@@ -43,6 +43,8 @@ cnoremap <silent> <Plug>CmdlineCompletionBackward
 cnoremap <silent> <Plug>CmdlineCompletionForward 
             \ <C-\>e<SID>CmdlineCompletion(0)<CR>
 
+let s:word_pattern = '[0-9A-Za-z_-]\+'
+
 "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 " auto completion function ,
 " return new cmdline with matched word
@@ -54,7 +56,7 @@ function! s:CmdlineCompletion(backword)
     let cmdline_tail = strpart(cmdline, cmdpos) 
     let cmdline = strpart(cmdline,0,cmdpos)
 
-    let index = match(cmdline, '\w\+$')
+    let index = match(cmdline, s:word_pattern . '$')
     let cmd = strpart(cmdline, 0, index)
 
     " Not a word , skip completion
@@ -171,7 +173,7 @@ function! s:SearchCurrent(backward)
     call cursor(position)
 
     " search ...
-    let pattern = '\<' . b:cc_word_prefix . '\w\+\>'
+    let pattern = '\<' . b:cc_word_prefix . s:word_pattern
     let flag = a:backward ? 'web' : 'we'
 
     " loop search until match unique or none
@@ -194,7 +196,8 @@ function! s:SearchCurrent(backward)
         endif
 
         " get matched word under cursor
-        let word = expand("<cword>")
+        let text = getline('.')
+        let word = matchstr(text, pattern)
 
         " add to list if not exists
         if count(b:cc_word_list, word) == 0 
@@ -220,7 +223,7 @@ endfunction
 " return 0 if match none, else return 1 .
 function! s:SearchBuffer(backward,bufindex)
 
-    let pattern = '\<' . b:cc_word_prefix . '\w\+\>'
+    let pattern = '\<' . b:cc_word_prefix . s:word_pattern
 
     while 1
 
